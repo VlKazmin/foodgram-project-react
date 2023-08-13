@@ -5,12 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from .validators import CustomUsernameValidator
 
 
-class Role(models.TextChoices):
-    GUEST = "guest", _("Гость")
-    USER = "user", _("Пользователь")
-    ADMIN = "admin", _("Администратор")
-
-
 class User(AbstractUser):
     email = models.EmailField(
         _("Электронная почта"),
@@ -43,13 +37,6 @@ class User(AbstractUser):
         max_length=150,
     )
 
-    role = models.CharField(
-        _("Роль"),
-        max_length=50,
-        choices=Role.choices,
-        default=Role.GUEST,
-    )
-
     class Meta:
         verbose_name = _("Пользователь")
         verbose_name_plural = _("Пользователи")
@@ -66,22 +53,25 @@ class User(AbstractUser):
 
 class Subscription(models.Model):
     follower = models.ForeignKey(
-        _("Подписчик"),
-        User,
+        to=User,
+        verbose_name=_("Подписчик"),
         on_delete=models.CASCADE,
         related_name="follower",
     )
     following = models.ForeignKey(
-        _("Автор"),
-        User,
+        to=User,
+        verbose_name=_("Автор"),
         on_delete=models.CASCADE,
         related_name="following",
     )
 
     class Meta:
+        verbose_name = _("Подписка")
+        verbose_name_plural = _("Подписки")
         constraints = [
             models.UniqueConstraint(
-                fields=["following", "follower"], name="unique_follow"
+                fields=["following", "follower"],
+                name="unique_follow",
             )
         ]
 
