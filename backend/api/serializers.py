@@ -6,23 +6,23 @@ from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (
+    Favorite,
     Ingredient,
     Recipe,
     RecipeIngredient,
-    Tag,
-    Favorite,
     ShoppingCart,
+    Tag,
 )
 from users.models import Subscription, User
 
 from .utils import create_ingredients, get_tags
 from .validators import (
     validate_email,
-    validate_me,
-    validate_username,
-    validate_post_required_fields,
     validate_favorite_recipe,
+    validate_me,
+    validate_post_required_fields,
     validate_shopping_cart_recipe,
+    validate_username,
 )
 
 

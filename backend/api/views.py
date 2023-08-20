@@ -1,38 +1,27 @@
 import os
+
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
+
+from djoser.views import UserViewSet as DjoserUserViewSet
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from djoser.views import UserViewSet as DjoserUserViewSet
-
-from recipes.models import (
-    Ingredient,
-    Recipe,
-    Tag,
-    Favorite,
-    ShoppingCart,
-)
 from users.models import Subscription, User
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 
 from .filter import RecipeFilter
-from .permissions import ReadOnly, Author
-from .serializers import (
-    CreateRecipeSerializer,
-    IngredientSerializer,
-    ReadRecipeSerializer,
-    TagSerializer,
-    UserSerializer,
-    UserSubscriptionSerializer,
-    FavoriteSerializer,
-    Shopping_CartSerializer,
-)
-from .utils import get_shopping_cart_ingredients, generate_shopping_cart_txt
+from .permissions import Author, ReadOnly
+from .serializers import (CreateRecipeSerializer, FavoriteSerializer,
+                          IngredientSerializer, ReadRecipeSerializer,
+                          Shopping_CartSerializer, TagSerializer,
+                          UserSerializer, UserSubscriptionSerializer)
+from .utils import generate_shopping_cart_txt, get_shopping_cart_ingredients
 
 
 class PublicUserViewSet(DjoserUserViewSet, viewsets.ModelViewSet):
