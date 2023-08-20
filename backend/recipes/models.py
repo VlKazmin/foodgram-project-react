@@ -1,4 +1,5 @@
 from django.db import models
+
 from users.models import User
 
 from .validators import (
@@ -20,7 +21,7 @@ class Tag(models.Model):
         verbose_name="Цвет в HEX",
         max_length=7,
         validators=[Hex_Validator],
-        help_text="Цвет должен быть в формате HEX-кода(например, #49B64E).",
+        help_text="Цвет должен быть в формате HEX-кода (например, #49B64E).",
     )
     slug = models.CharField(
         verbose_name="Уникальный слаг",
@@ -32,10 +33,36 @@ class Tag(models.Model):
     class Meta:
         verbose_name = "Тэг"
         verbose_name_plural = "Тэги"
-        ordering = "name",
+        ordering = ["name"]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"{self.name} (цвет: {self.color})"
+
+
+class Ingredient(models.Model):
+    name = models.CharField(
+        verbose_name="Название",
+        max_length=200,
+        unique=True,
+    )
+    measurement_unit = models.CharField(
+        verbose_name="Единицы измерения",
+        max_length=200,
+    )
+
+    class Meta:
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "measurement_unit"],
+                name="unique_ingredient_name_measurement_unit",
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -60,9 +87,9 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         verbose_name="Список ингредиентов",
-        to="Ingredient",
+        to=Ingredient,
         through="RecipeIngredient",
-        related_name="ingredients",
+        related_name="recipes",
     )
     tags = models.ManyToManyField(
         verbose_name="Тег",
@@ -79,33 +106,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
-        ordering = "-id",
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Ingredient(models.Model):
-    name = models.CharField(
-        verbose_name="Название",
-        max_length=200,
-        unique=True,
-    )
-    measurement_unit = models.CharField(
-        verbose_name="Единицы измерения",
-        max_length=200,
-    )
-
-    class Meta:
-        verbose_name = "Список ингредиентов"
-        verbose_name_plural = "Список ингредиентов"
-        ordering = "id",
-        constraints = [
-            models.UniqueConstraint(
-                fields=["name", "measurement_unit"],
-                name="unique_ingredient_name_measurement_unit",
-            ),
-        ]
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -114,7 +115,7 @@ class Ingredient(models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         to=Recipe,
-        related_name="recipeingredient",
+        related_name="recipe_ingredients",
         verbose_name="Рецепт",
         on_delete=models.CASCADE,
     )
@@ -132,7 +133,7 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент для рецепта"
         verbose_name_plural = "Ингредиенты для рецепта"
-        ordering = "id",
+        ordering = ["id"]
 
     def __str__(self):
         return (
@@ -141,7 +142,7 @@ class RecipeIngredient(models.Model):
         )
 
 
-class Favorite_ShopCart_BaseModel(models.Model):
+class BaseCartItem(models.Model):
     user = models.ForeignKey(
         to=User,
         verbose_name="Пользователь",
@@ -159,7 +160,7 @@ class Favorite_ShopCart_BaseModel(models.Model):
         abstract = True
 
 
-class Favorite(Favorite_ShopCart_BaseModel):
+class Favorite(BaseCartItem):
     class Meta:
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"
@@ -170,7 +171,7 @@ class Favorite(Favorite_ShopCart_BaseModel):
         ]
 
 
-class Shopping_Cart(Favorite_ShopCart_BaseModel):
+class ShoppingCart(BaseCartItem):
     class Meta:
         verbose_name = "Элемент корзины"
         verbose_name_plural = "Элементы корзины"

@@ -1,20 +1,20 @@
 from django.core.validators import RegexValidator, MinValueValidator
-from django.utils.translation import gettext_lazy as _
 
 
 class Slug_Validator(RegexValidator):
-    regex = (r"^[-a-zA-Z0-9_]+$",)
+    regex = r"^[-a-zA-Z0-9_]+$"
     message = (
-        _(
-            "Слаг может содержать только буквы, цифры, "
-            "знаки минус, подчеркивания и без пробелов."
-        ),
+        "Слаг может содержать только буквы, цифры, "
+        "знаки минус, подчеркивания и без пробелов.",
     )
 
 
 class Hex_Validator(RegexValidator):
-    regex = (r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",)
-    message = ("Цвет должен быть в формате HEX-кода (например, #49B64E).",)
+    regex = r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+    message = "Цвет должен быть в формате HEX-кода (например, #49B64E).",
+
+    def __call__(self, value):
+        return bool(self.regex.search(value))
 
 
 class CookingTime_Validator:
