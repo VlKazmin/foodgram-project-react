@@ -21,7 +21,7 @@ from recipes.models import (
 from users.models import Subscription, User
 
 from .filter import RecipeFilter
-from .permissions import AdminOrReadOnly, ReadOnly
+from .permissions import ReadOnly, Author
 from .serializers import (
     CreateRecipeSerializer,
     IngredientSerializer,
@@ -111,7 +111,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [AdminOrReadOnly]
+    permission_classes = [ReadOnly]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -129,6 +129,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = ReadRecipeSerializer
+    permission_classes = [Author]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
