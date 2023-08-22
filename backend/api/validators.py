@@ -46,7 +46,7 @@ def validate_post_required_fields(self, data):
     """
     request_method = self.context.get("request").method
 
-    if request_method in ["POST", "PATCH"]:
+    if request_method in ["POST"]:
         required_fields = [
             "image",
             "name",
@@ -59,13 +59,14 @@ def validate_post_required_fields(self, data):
         for field in required_fields:
             if field not in data:
                 raise serializers.ValidationError(
-                    {field: ["Это поле обязательно для создания рецепта."]}
+                    [f"{field} - это поле обязательно для создания рецепта."]
                 )
 
     return data
 
 
 def validate_favorite_recipe(data):
+    """Проверка уникальности рецептов в избранном."""
     user = data["user"]
     if user.favorites.filter(recipe=data["recipe"]).exists():
         raise serializers.ValidationError("Рецепт уже добавлен в избранное.")
@@ -73,6 +74,7 @@ def validate_favorite_recipe(data):
 
 
 def validate_shopping_cart_recipe(data):
+    """Проверка уникальности рецептов в корзине."""
     user = data["user"]
     if user.shoppingcarts.filter(recipe=data["recipe"]).exists():
         raise serializers.ValidationError(

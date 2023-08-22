@@ -23,7 +23,7 @@ class Tag(models.Model):
         validators=[Hex_Validator],
         help_text="Цвет должен быть в формате HEX-кода (например, #49B64E).",
     )
-    slug = models.CharField(
+    slug = models.SlugField(
         verbose_name="Уникальный слаг",
         max_length=200,
         unique=True,

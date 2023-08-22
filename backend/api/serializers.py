@@ -255,10 +255,14 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, instance):
         user = self.context.get("request").user
-        return user.favorites.filter(recipe=instance).exists()
+        if user.is_anonymous:
+            return False
+        return instance.favorites.filter(recipe=instance).exists()
 
     def get_is_in_shopping_cart(self, instance):
         user = self.context.get("request").user
+        if user.is_anonymous:
+            return False
         return user.shoppingcarts.filter(recipe=instance).exists()
 
 
@@ -342,7 +346,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         get_tags(self, tags_data, instance)
         create_ingredients(self, ingredients_data, instance)
 
-        return super().update(instance, validated_data)
+        return instance
 
     def to_representation(self, instance):
         return ReadRecipeSerializer(

@@ -1,3 +1,7 @@
+import os
+
+from django.http import HttpResponse
+
 from rest_framework import serializers
 
 from recipes.models import Tag, RecipeIngredient
@@ -26,6 +30,7 @@ def get_tags(self, tags_data, obj):
         except Tag.DoesNotExist:
             raise serializers.ValidationError({"error": "Тег не найден."})
 
+    obj.tags.clear()
     obj.tags.set(tags)
 
 
@@ -38,7 +43,7 @@ def create_ingredients(self, ingredients_data, obj):
         self: Экземпляр сериализатора.
         ingredients_data (list): Список данных об ингредиентах,
                                  включая их идентификаторы и количество.
-        obj: Объект, с которым связываются ингредиенты (например, рецепт).
+        obj: Объект, с которым связываются ингредиенты (рецепт).
 
     Raises:
         serializers.ValidationError: Если один из ингредиентов не найден в БД.
@@ -47,6 +52,7 @@ def create_ingredients(self, ingredients_data, obj):
         None
     """
     obj.recipe_ingredients.all().delete()
+
     ingredients = []
 
     for ingredient_data in ingredients_data:
@@ -122,3 +128,22 @@ def generate_shopping_cart_txt(ingredients_data):
         txt_content += f"{ingredient_name} ({measurement_unit}) - {amount}\n"
 
     return txt_content
+
+
+def send_shopping_cart_txt(txt_content):
+    """Отправляет текстовый файл списка покупок в HTTP-ответе."""
+    temp_file_path = "temp_shopping_cart.txt"
+
+    try:
+        with open(temp_file_path, "w", encoding="utf-8") as txt_file:
+            txt_file.write(txt_content)
+
+        with open(temp_file_path, "rb") as txt_file:
+            response = HttpResponse(txt_file.read(), content_type="text/plain")
+            response[
+                "Content-Disposition"
+            ] = f'attachment; filename="{os.path.basename(temp_file_path)}"'
+
+        return response
+    finally:
+        os.remove(temp_file_path)

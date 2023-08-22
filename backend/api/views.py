@@ -1,6 +1,3 @@
-import os
-
-from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -9,19 +6,37 @@ from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
 from users.models import Subscription, User
-from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 
-from .filter import RecipeFilter
-from .permissions import Author, ReadOnly
-from .serializers import (CreateRecipeSerializer, FavoriteSerializer,
-                          IngredientSerializer, ReadRecipeSerializer,
-                          Shopping_CartSerializer, TagSerializer,
-                          UserSerializer, UserSubscriptionSerializer)
-from .utils import generate_shopping_cart_txt, get_shopping_cart_ingredients
+from .filter import IngredientFilter, RecipeFilter
+from .serializers import (
+    CreateRecipeSerializer,
+    FavoriteSerializer,
+    IngredientSerializer,
+    ReadRecipeSerializer,
+    Shopping_CartSerializer,
+    TagSerializer,
+    UserSerializer,
+    UserSubscriptionSerializer,
+)
+from .utils import (
+    generate_shopping_cart_txt,
+    get_shopping_cart_ingredients,
+    send_shopping_cart_txt,
+)
 
 
 class PublicUserViewSet(DjoserUserViewSet, viewsets.ModelViewSet):
@@ -29,7 +44,7 @@ class PublicUserViewSet(DjoserUserViewSet, viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [ReadOnly]
+    permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
 
     @action(
@@ -100,7 +115,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [ReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -110,15 +126,16 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = [ReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
     search_fields = ("^name",)
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = ReadRecipeSerializer
-    permission_classes = [Author]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -193,19 +210,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def download_shopping_cart(self, request):
+        """Отправляет текстовый файл списка покупок."""
+
         user = request.user
         ingredients_data = get_shopping_cart_ingredients(user)
         txt_content = generate_shopping_cart_txt(ingredients_data)
-
-        temp_file_path = "temp_shopping_cart.txt"
-        with open(temp_file_path, "w", encoding="utf-8") as txt_file:
-            txt_file.write(txt_content)
-
-        with open(temp_file_path, "rb") as txt_file:
-            response = HttpResponse(txt_file.read(), content_type="text/plain")
-            response[
-                "Content-Disposition"
-            ] = f'attachment; filename="{os.path.basename(temp_file_path)}"'
-        os.remove(temp_file_path)
+        response = send_shopping_cart_txt(txt_content)
 
         return response
