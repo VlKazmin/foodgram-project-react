@@ -2,7 +2,7 @@ import csv
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from recipes.models import Ingredient
-from foodgram.settings import CSV_FILE_PATH
+from foodgram.settings import INGREDIENT_CSV_FILE_PATH
 
 MODELS_FILES = {
     Ingredient: "ingredients.csv",
@@ -19,7 +19,7 @@ def load_csv(self):
     for model, file in MODELS_FILES.items():
         success = f"Таблица {model.__qualname__} успешно загружена."
         error_load = f"Не удалось загрузить таблицу {model.__qualname__}."
-        file_path = f"{CSV_FILE_PATH}/{file}"
+        file_path = f"{INGREDIENT_CSV_FILE_PATH}/{file}"
 
         try:
             with open(file_path, "r", encoding="utf-8") as csv_file:
