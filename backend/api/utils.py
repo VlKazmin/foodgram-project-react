@@ -1,5 +1,7 @@
 import os
 
+from tabulate import tabulate
+
 from django.http import HttpResponse
 
 from rest_framework import serializers
@@ -34,7 +36,7 @@ def get_tags(self, tags_data, obj):
     obj.tags.set(tags)
 
 
-def create_ingredients(self, ingredients_data, obj):
+def create_ingredients(self, ingredients_data, instance):
     """
     Создает и связывает ингредиенты с объектом
     на основе предоставленных данных.
@@ -43,7 +45,7 @@ def create_ingredients(self, ingredients_data, obj):
         self: Экземпляр сериализатора.
         ingredients_data (list): Список данных об ингредиентах,
                                  включая их идентификаторы и количество.
-        obj: Объект, с которым связываются ингредиенты (рецепт).
+        instance: Объект, с которым связываются ингредиенты (рецепт).
 
     Raises:
         serializers.ValidationError: Если один из ингредиентов не найден в БД.
@@ -51,19 +53,30 @@ def create_ingredients(self, ingredients_data, obj):
     Returns:
         None
     """
-    obj.recipe_ingredients.all().delete()
+    instance.recipe_ingredients.all().delete()
 
     ingredients = []
 
     for ingredient_data in ingredients_data:
+        ingredient_id = ingredient_data["id"]
+        amount = ingredient_data["amount"]
+
         try:
-            ingredients.append(
-                RecipeIngredient(
-                    ingredient=ingredient_data["id"],
-                    amount=ingredient_data["amount"],
-                    recipe=obj,
-                )
+            existing_ingredient = next(
+                (i for i in ingredients if i.ingredient == ingredient_id), None
             )
+
+            if existing_ingredient:
+                existing_ingredient.amount += amount
+
+            else:
+                ingredients.append(
+                    RecipeIngredient(
+                        ingredient=ingredient_id,
+                        amount=amount,
+                        recipe=instance,
+                    )
+                )
 
         except Exception:
             raise serializers.ValidationError(
@@ -121,13 +134,18 @@ def generate_shopping_cart_txt(ingredients_data):
     Returns:
         str: Текстовое представление списка покупок.
     """
-    txt_content = "Список покупок:\n\n"
+    headers = ["Ингредиент", "Единицы измерения", "Количество"]
+    rows = []
+
     for ingredient_name, ingredient_info in ingredients_data.items():
         measurement_unit = ingredient_info["measurement_unit"]
         amount = ingredient_info["amount"]
-        txt_content += f"{ingredient_name} ({measurement_unit}) - {amount}\n"
+        rows.append([ingredient_name, measurement_unit, amount])
 
-    return txt_content
+    # Используем tabulate для форматирования таблицы
+    txt_content = tabulate(rows, headers, tablefmt="grid")
+
+    return f"Список покупок:\n\n{txt_content}\n"
 
 
 def send_shopping_cart_txt(txt_content):
