@@ -35,10 +35,6 @@ class User(AbstractUser):
         "Фамилия",
         max_length=150,
     )
-    password: models.CharField = models.CharField(
-        "Пароль",
-        max_length=150,
-    )
 
     class Meta:
         verbose_name: str = "Пользователь"

@@ -3,17 +3,9 @@ from django.db.transaction import atomic
 
 from rest_framework import serializers
 
-from drf_extra_fields.fields import Base64ImageField
+from djoser.serializers import UserCreateSerializer
 
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingCart,
-    Tag,
-)
-from users.models import Subscription, User
+from drf_extra_fields.fields import Base64ImageField
 
 from .utils import create_ingredients, get_tags
 from .validators import (
@@ -24,6 +16,16 @@ from .validators import (
     validate_shopping_cart_recipe,
     validate_username,
 )
+
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
+from users.models import Subscription, User
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
@@ -84,7 +86,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
         return data
 
 
-class UserSerializer(UserBaseSerializer):
+class UserSerializer(UserBaseSerializer, UserCreateSerializer):
     """
     Сериализатор для создания и обновления пользователей,
     включая поле password.

@@ -44,7 +44,6 @@ class PublicUserViewSet(DjoserUserViewSet, viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
 
     @action(
