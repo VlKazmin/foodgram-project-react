@@ -115,7 +115,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "infra/docker-compose.yml, infra/nginx.conf"
+        source: infra/*
         target: "foodgram-project-react/"
 
     - name: Executing remote ssh commands to deploy
@@ -132,7 +132,7 @@ jobs:
           sudo docker compose -f docker-compose.yml up -d
           sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
-          sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /static/
+          sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /static/
           sudo docker compose -f docker-compose.yml exec backend python manage.py migrate load_csv
 
 
