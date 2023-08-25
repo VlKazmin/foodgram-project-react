@@ -59,7 +59,7 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USER }}
-        key: ${{ secrets.SSH_KEY }}
+        key: ${{ secrets.SSH_PASSPHRASE }}
         source: "infra/"
         target: "/${{ secrets.USER }}/foodgram/"
 
@@ -68,7 +68,7 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USER }}
-        key: ${{ secrets.SSH_KEY }}
+        key: ${{ secrets.SSH_PASSPHRASE }}
         source: "docs/"
         target: "/${{ secrets.USER }}/foodgram/docs/"
 
