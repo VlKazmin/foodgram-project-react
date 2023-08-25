@@ -47,34 +47,6 @@ jobs:
         run: |
             python -m flake8 backend/
 
-  copy_files_on_server:
-    name: Copy docs and infra
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Copy infra
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USER }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        key: ${{ secrets.SSH_KEY }}
-        source: "infra/"
-        target: "/${{ secrets.USER }}/foodgram/"
-
-    - name: Copy docs
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USER }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        key: ${{ secrets.SSH_KEY }}
-        source: "docs/"
-        target: "/${{ secrets.USER }}/foodgram/docs/"
-
-
   build_backend_and_push_to_docker_hub:
     if: ${{ github.ref == 'refs/heads/main' }}
     name: Push Docker image to DockerHub
@@ -129,7 +101,6 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     needs:
-      - copy_files_on_server
       - build_backend_and_push_to_docker_hub
       - build_frontend_and_push_to_docker_hub
 
@@ -144,7 +115,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "docker-compose.yml"
+        source: "infra/"
         target: "foodgram-project-react"
 
     - name: Executing remote ssh commands to deploy
@@ -156,13 +127,13 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
           cd foodgram-project-react
-          sudo docker compose -f docker-compose.production.yml pull
-          sudo docker compose -f docker-compose.production.yml down
-          sudo docker compose -f docker-compose.production.yml up -d
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+          sudo docker compose -f docker-compose.yml pull
+          sudo docker compose -f docker-compose.yml down
+          sudo docker compose -f docker-compose.yml up -d
+          sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+          sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
           sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /static/
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate load_csv
+          sudo docker compose -f docker-compose.yml exec backend python manage.py migrate load_csv
 
 
   send_message:
