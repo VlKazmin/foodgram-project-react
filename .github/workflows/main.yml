@@ -116,7 +116,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         source: "infra/"
-        target: "foodgram-project-react"
+        target: "foodgram-project-react/"
 
     - name: Executing remote ssh commands to deploy
       uses: appleboy/ssh-action@master
