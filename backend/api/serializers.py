@@ -1,11 +1,11 @@
 from django.db.models import F
 from django.db.transaction import atomic
 
-from rest_framework import serializers
-
 from djoser.serializers import UserCreateSerializer
 
 from drf_extra_fields.fields import Base64ImageField
+
+from rest_framework import serializers
 
 from .utils import create_ingredients, get_tags
 from .validators import (

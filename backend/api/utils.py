@@ -1,12 +1,12 @@
 import os
 
-from tabulate import tabulate
-
 from django.http import HttpResponse
 
 from rest_framework import serializers
 
-from recipes.models import Tag, RecipeIngredient
+from recipes.models import RecipeIngredient, Tag
+
+from tabulate import tabulate
 
 
 def get_tags(self, tags_data, obj):
