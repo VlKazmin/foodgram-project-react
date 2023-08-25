@@ -133,7 +133,7 @@ jobs:
           sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
           sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /static/
-          sudo docker compose -f docker-compose.yml exec backend python manage.py migrate load_csv
+          sudo docker compose -f docker-compose.yml exec backend python manage.py load_csv
 
 
   send_message:
