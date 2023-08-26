@@ -15,7 +15,7 @@ def clear(self):
     self.stdout.write(self.style.SUCCESS("База данных успешно очищена."))
 
 
-def load_csv(self):
+def load_ingredients(self):
     for model, file in MODELS_FILES.items():
         success = f"Таблица {model.__qualname__} успешно загружена."
         error_load = f"Не удалось загрузить таблицу {model.__qualname__}."
@@ -58,4 +58,4 @@ def load_csv(self):
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         clear(self)
-        load_csv(self)
+        load_ingredients(self)
