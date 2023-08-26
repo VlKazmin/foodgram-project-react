@@ -118,16 +118,6 @@ jobs:
         source: "infra/"
         target: "foodgram-project-react/"
 
-    - name: Copy docs/ via ssh
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USER }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "docs/"
-        target: "foodgram-project-react/"
-
     - name: Executing remote ssh commands to deploy
       uses: appleboy/ssh-action@master
       with:
@@ -143,7 +133,7 @@ jobs:
           sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
           sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /static/
-          sudo docker compose -f docker-compose.yml exec backend python manage.py load_csv
+          sudo docker compose -f docker-compose.yml exec backend python manage.py load_ingredients
 
 
   send_message:
