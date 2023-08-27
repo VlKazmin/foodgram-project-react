@@ -1,44 +1,43 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 
-from .validators import Username_Validator, validate_not_me
+from .validators import UsernameValidator, validate_not_me
 
 
 class User(AbstractUser):
-    email: models.EmailField = models.EmailField(
+    email = models.EmailField(
         "Электронная почта",
         max_length=254,
         unique=True,
     )
 
-    username: models.CharField = models.CharField(
+    username = models.CharField(
         "Имя пользователя",
         max_length=150,
         unique=True,
         db_index=True,
         validators=[
             validate_not_me,
-            Username_Validator,
+            UsernameValidator,
         ],
         error_messages={
             "unique": "Пользователь с таким именем уже существует.",
         },
     )
 
-    first_name: models.CharField = models.CharField(
+    first_name = models.CharField(
         "Имя",
         max_length=150,
     )
 
-    last_name: models.CharField = models.CharField(
+    last_name = models.CharField(
         "Фамилия",
         max_length=150,
     )
 
     class Meta:
-        verbose_name: str = "Пользователь"
-        verbose_name_plural: str = "Пользователи"
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
         constraints = [
             models.UniqueConstraint(
                 fields=("username", "email"), name="unique_username_email"
@@ -50,13 +49,13 @@ class User(AbstractUser):
 
 
 class Subscription(models.Model):
-    follower: models.ForeignKey = models.ForeignKey(
+    follower = models.ForeignKey(
         to=User,
         verbose_name="Подписчик",
         on_delete=models.CASCADE,
         related_name="follower",
     )
-    author: models.ForeignKey = models.ForeignKey(
+    author = models.ForeignKey(
         to=User,
         verbose_name="Автор",
         on_delete=models.CASCADE,
@@ -64,20 +63,18 @@ class Subscription(models.Model):
     )
 
     class Meta:
-        verbose_name: str = "Подписка"
-        verbose_name_plural: str = "Подписки"
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
         constraints = [
             models.UniqueConstraint(
                 fields=["author", "follower"],
                 name="unique_follow",
-            )
+            ),
+            models.CheckConstraint(
+                check=~models.Q(author=models.F("follower")),
+                name="no_self_follow",
+            ),
         ]
 
     def __str__(self) -> str:
         return f"Пользователь {self.follower}, подписался на {self.author}"
-
-    def clean(self) -> None:
-        if self.follower == self.author:
-            raise ValidationError(
-                "Пользователь не может подписаться на самого себя."
-            )
