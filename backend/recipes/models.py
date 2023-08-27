@@ -1,12 +1,13 @@
 from django.db import models
 
+from colorfield.fields import ColorField
+
 from users.models import User
 
 from .validators import (
     CookingTime_Validator,
-    Hex_Validator,
     IngredientAmount_Validator,
-    Slug_Validator,
+    SlugValidator,
 )
 
 
@@ -17,23 +18,21 @@ class Tag(models.Model):
         unique=True,
         db_index=True,
     )
-    color = models.CharField(
+    color = ColorField(
         verbose_name="Цвет в HEX",
-        max_length=7,
-        validators=[Hex_Validator],
         help_text="Цвет должен быть в формате HEX-кода (например, #49B64E).",
     )
     slug = models.SlugField(
         verbose_name="Уникальный слаг",
         max_length=200,
         unique=True,
-        validators=[Slug_Validator],
+        validators=[SlugValidator],
     )
 
     class Meta:
         verbose_name = "Тэг"
         verbose_name_plural = "Тэги"
-        ordering = ["name"]
+        ordering = ("name",)
 
     def __str__(self):
         return f"{self.name} (цвет: {self.color})"
@@ -43,7 +42,6 @@ class Ingredient(models.Model):
     name = models.CharField(
         verbose_name="Название",
         max_length=200,
-        unique=True,
     )
     measurement_unit = models.CharField(
         verbose_name="Единицы измерения",
@@ -53,7 +51,6 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
-        ordering = ["id"]
         constraints = [
             models.UniqueConstraint(
                 fields=["name", "measurement_unit"],
@@ -106,7 +103,6 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
-        ordering = ["-id"]
 
     def __str__(self):
         return self.name
