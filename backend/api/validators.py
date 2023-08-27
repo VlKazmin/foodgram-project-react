@@ -40,6 +40,21 @@ def validate_email(data):
     return data
 
 
+def validate_is_subscribed(data):
+    """
+    Проверка невозможности подписаться на самого себя.
+    """
+    follower = data["follower"]
+    author = data["author"]
+
+    if author == follower:
+        raise serializers.ValidationError(
+            "Пользователь не может подписаться на самого себя."
+        )
+
+    return data
+
+
 def validate_post_required_fields(self, data):
     """
     Проверка наличия требуемых полей.
