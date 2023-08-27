@@ -1,8 +1,10 @@
 import csv
+
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
-from recipes.models import Ingredient
+
 from foodgram.settings import INGREDIENT_CSV_FILE_PATH
+from recipes.models import Ingredient
 
 MODELS_FILES = {
     Ingredient: "ingredients.csv",
@@ -25,6 +27,7 @@ def load_ingredients(self):
             with open(file_path, "r", encoding="utf-8") as csv_file:
                 fieldnames = ["name", "measurement_unit"]
                 reader = csv.DictReader(csv_file, fieldnames=fieldnames)
+
                 instances_to_create = []
 
                 for data in reader:
@@ -39,20 +42,14 @@ def load_ingredients(self):
         except IntegrityError:
             print(
                 self.style.WARNING(
-                    "Ошибка уникальности. Конфликтующие значения:"
+                    "Ошибка уникальности значений."
                 )
             )
-            for instance in instances_to_create:
-                try:
-                    instance.save()
-                except IntegrityError:
-                    print(instance)
-                    continue
-            print("Конфликтующие значения обработаны.")
-            print(self.style.SUCCESS(success))
 
         except (ValueError, FileNotFoundError) as error:
-            print(f"Ошибка в загрузке. {error}. {error_load}")
+            print(
+                self.style.ERROR(f"Ошибка в загрузке. {error}. {error_load}")
+            )
 
 
 class Command(BaseCommand):
