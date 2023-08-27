@@ -102,7 +102,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     о его подписках и созданных рецептах.
     """
 
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
