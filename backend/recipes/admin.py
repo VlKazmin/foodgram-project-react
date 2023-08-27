@@ -35,6 +35,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return obj.favorites.count()
 
 
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Админ панель управление ингридиентами"""
 
@@ -44,12 +45,14 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = "-пусто-"
 
 
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ("name", "color", "slug")
     search_fields = ("name",)
     empty_value_display = "-пусто-"
 
 
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     """Админ панель управление подписками"""
 
@@ -59,6 +62,7 @@ class FavoriteAdmin(admin.ModelAdmin):
     empty_value_display = "-пусто-"
 
 
+@admin.register(ShoppingCart)
 class ShoplistAdmin(admin.ModelAdmin):
     """Админ панель списка покупок"""
 
@@ -66,9 +70,3 @@ class ShoplistAdmin(admin.ModelAdmin):
     list_filter = ("recipe", "user")
     search_fields = ("user",)
     empty_value_display = "-пусто-"
-
-
-admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(Tag, TagAdmin)
-admin.site.register(Favorite, FavoriteAdmin)
-admin.site.register(ShoppingCart, ShoplistAdmin)
