@@ -22,8 +22,8 @@ from .utils import create_ingredients, get_tags
 from .validators import (
     validate_email,
     validate_favorite_recipe,
-    validate_is_subscribed,
     validate_me,
+    validate_is_subscribed,
     validate_post_required_fields,
     validate_shopping_cart_recipe,
     validate_username,
@@ -58,7 +58,7 @@ class UserSerializer(UserCreateSerializer):
             validate_me,
             validate_username,
             validate_email,
-            validate_is_subscribed,
+            validate_is_subscribed
         ]
 
     def get_is_subscribed(self, user):

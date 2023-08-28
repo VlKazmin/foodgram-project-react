@@ -44,8 +44,8 @@ def validate_is_subscribed(data):
     """
     Проверка невозможности подписаться на самого себя.
     """
-    follower = data["follower"]
-    author = data["author"]
+    follower = data.context.get("request").user
+    author = data["username"]
 
     if author == follower:
         raise serializers.ValidationError(
