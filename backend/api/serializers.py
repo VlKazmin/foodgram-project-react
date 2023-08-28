@@ -23,7 +23,6 @@ from .validators import (
     validate_email,
     validate_favorite_recipe,
     validate_me,
-    validate_is_subscribed,
     validate_post_required_fields,
     validate_shopping_cart_recipe,
     validate_username,
@@ -58,7 +57,6 @@ class UserSerializer(UserCreateSerializer):
             validate_me,
             validate_username,
             validate_email,
-            validate_is_subscribed
         ]
 
     def get_is_subscribed(self, user):
@@ -72,7 +70,12 @@ class UserSerializer(UserCreateSerializer):
             bool: True, если пользователь подписан на других пользователей,
             иначе False.
         """
-        return Subscription.objects.filter(author=user).exists()
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return Subscription.objects.filter(
+                author=user, follower=request.user
+            ).exists()
+        return False
 
     def to_representation(self, instance):
         """
@@ -165,7 +168,12 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
             bool: True, если пользователь подписан на других пользователей,
             иначе False.
         """
-        return Subscription.objects.filter(author=user).exists()
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return Subscription.objects.filter(
+                author=user, follower=request.user
+            ).exists()
+        return False
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -258,9 +266,11 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, instance):
         user = self.context.get("request").user
-        if user.is_anonymous:
-            return False
-        return instance.favorites.filter(recipe=instance).exists()
+        if user.is_authenticated:
+            return instance.favorites.filter(
+                user=user, recipe=instance
+            ).exists()
+        return False
 
     def get_is_in_shopping_cart(self, instance):
         user = self.context.get("request").user
