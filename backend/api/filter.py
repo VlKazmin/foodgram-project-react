@@ -16,7 +16,7 @@ class RecipeFilter(FilterSet):
     )
 
     author = filters.CharFilter(
-        field_name="author__username",
+        field_name="author__id",
         lookup_expr="iexact",
     )
     is_favorited = filters.NumberFilter(method="filter_is_favorited")
