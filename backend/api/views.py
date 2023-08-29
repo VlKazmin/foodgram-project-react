@@ -31,6 +31,7 @@ from .serializers import (
     TagSerializer,
     UserSerializer,
     UserSubscriptionSerializer,
+    UserSubscribeSerializer,
 )
 from .utils import (
     generate_shopping_cart_txt,
@@ -39,7 +40,7 @@ from .utils import (
 )
 
 
-class PublicUserViewSet(DjoserUserViewSet, viewsets.ModelViewSet):
+class PublicUserViewSet(DjoserUserViewSet):
     """Представление для работы с публичными данными пользователей."""
 
     queryset = User.objects.all()
@@ -62,35 +63,39 @@ class PublicUserViewSet(DjoserUserViewSet, viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["post", "delete"],
+        methods=["post"],
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, id):
         """Подписаться на пользователя."""
-        try:
-            author = User.objects.get(id=id)
-        except User.DoesNotExist:
-            message = {"Пользователь не найден."}
-            return Response(message, status=status.HTTP_404_NOT_FOUND)
-
-        if request.user == author:
-            message = {"Вы не можете подписаться на самого себя"}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        author = get_object_or_404(User, id=id)
 
         if request.method == "POST":
+            serializer = UserSubscribeSerializer(
+                author,
+                data=request.data,
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+
             subscription, created = Subscription.objects.get_or_create(
                 follower=request.user,
                 author=author,
             )
 
             if created:
-                message = {f"Вы успешно подписались на {author}"}
-                return Response(message, status=status.HTTP_200_OK)
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED
+                )
             else:
                 message = {"Вы уже подписаны на этого пользователя"}
-                return Response(message, status=status.HTTP_200_OK)
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
+    @subscribe.mapping.delete
+    def delete_subscribe(self, request, id):
         """Отписаться от пользователя."""
+        author = get_object_or_404(User, id=id)
+
         try:
             subscription = Subscription.objects.get(
                 follower=request.user, author=author
