@@ -7,7 +7,7 @@ from foodgram.settings import INGREDIENT_CSV_FILE_PATH
 from recipes.models import Ingredient
 
 MODELS_FILES = {
-    Ingredient: "ingredients.csv",
+    "Ingredient": "ingredients.csv",
 }
 
 
@@ -19,8 +19,8 @@ def clear(self):
 
 def load_ingredients(self):
     for model, file in MODELS_FILES.items():
-        success = f"Таблица {model.__qualname__} успешно загружена."
-        error_load = f"Не удалось загрузить таблицу {model.__qualname__}."
+        success = f"Таблица {model} успешно загружена."
+        error_load = f"Не удалось загрузить таблицу {model}."
         file_path = f"{INGREDIENT_CSV_FILE_PATH}/{file}"
 
         try:
@@ -31,22 +31,15 @@ def load_ingredients(self):
                 instances_to_create = []
 
                 for data in reader:
-                    instance = model(**data)
+                    instance = Ingredient(**data)
                     instances_to_create.append(instance)
 
-                model.objects.bulk_create(
+                Ingredient.objects.bulk_create(
                     instances_to_create, ignore_conflicts=False
                 )
                 self.stdout.write(self.style.SUCCESS(success))
 
-        except IntegrityError:
-            print(
-                self.style.WARNING(
-                    "Ошибка уникальности значений."
-                )
-            )
-
-        except (ValueError, FileNotFoundError) as error:
+        except (FileNotFoundError, IntegrityError, ValueError) as error:
             print(
                 self.style.ERROR(f"Ошибка в загрузке. {error}. {error_load}")
             )
