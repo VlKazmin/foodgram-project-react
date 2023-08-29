@@ -176,6 +176,49 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         return False
 
 
+class UserSubscribeSerializer(UserSubscriptionSerializer):
+    """Сериализатор для представления данных
+    о подписке (отписке) пользователей.
+    """
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+        ]
+        read_only_fields = [
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+        ]
+
+    def validate(self, data):
+        """
+        Проверка, что пользователь не подписывается на самого себя.
+        """
+        request = self.context.get("request")
+        author_id = data.get("author_id")
+
+        if request.user.id == author_id:
+            raise serializers.ValidationError(
+                "Вы не можете подписаться на самого себя"
+            )
+
+        return data
+
+
 class TagSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели тега, предоставляющий информацию о теге.
