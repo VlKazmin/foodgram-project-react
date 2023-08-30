@@ -1,12 +1,4 @@
-from django.core.validators import RegexValidator, MinValueValidator
-
-
-class SlugValidator(RegexValidator):
-    regex = r"^[-a-zA-Z0-9_]+$"
-    message = (
-        "Слаг может содержать только буквы, цифры, "
-        "знаки минус, подчеркивания и без пробелов.",
-    )
+from django.core.validators import MinValueValidator
 
 
 class CookingTime_Validator:
