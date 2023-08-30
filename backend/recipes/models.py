@@ -7,7 +7,6 @@ from users.models import User
 from .validators import (
     CookingTime_Validator,
     IngredientAmount_Validator,
-    SlugValidator,
 )
 
 
@@ -26,7 +25,6 @@ class Tag(models.Model):
         verbose_name="Уникальный слаг",
         max_length=200,
         unique=True,
-        validators=[SlugValidator],
     )
 
     class Meta:
@@ -129,7 +127,6 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент для рецепта"
         verbose_name_plural = "Ингредиенты для рецепта"
-        ordering = ["id"]
 
     def __str__(self):
         return (
