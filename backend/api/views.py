@@ -70,43 +70,37 @@ class PublicUserViewSet(DjoserUserViewSet):
         """Подписаться на пользователя."""
         author = get_object_or_404(User, id=id)
 
-        if request.method == "POST":
-            serializer = UserSubscribeSerializer(
-                author,
-                data=request.data,
-                context={"request": request},
-            )
-            serializer.is_valid(raise_exception=True)
+        serializer = UserSubscribeSerializer(
+            author,
+            data=request.data,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
 
-            subscription, created = Subscription.objects.get_or_create(
-                follower=request.user,
-                author=author,
-            )
+        subscription, created = Subscription.objects.get_or_create(
+            follower=request.user,
+            author=author,
+        )
 
-            if created:
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED
-                )
-            else:
-                message = {"Вы уже подписаны на этого пользователя"}
-                return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        if created:
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            message = {"Вы уже подписаны на этого пользователя"}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id):
         """Отписаться от пользователя."""
         author = get_object_or_404(User, id=id)
 
-        try:
-            subscription = Subscription.objects.get(
-                follower=request.user, author=author
-            )
-            subscription.delete()
-            message = {f"Вы отписались от {author}"}
-            return Response(message, status=status.HTTP_204_NO_CONTENT)
-
-        except Subscription.DoesNotExist:
-            message = {f"Вы не подписаны на {author}"}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        subscription = get_object_or_404(
+            Subscription,
+            follower=request.user,
+            author=author,
+        )
+        subscription.delete()
+        message = {f"Вы отписались от {author}"}
+        return Response(message, status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -160,17 +154,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         user = request.user
+        data = {"user": user.id, "recipe": recipe.id}
 
-        if request.method == "POST":
-            data = {"user": user.id, "recipe": recipe.id}
-            serializer = FavoriteSerializer(
-                data=data,
-                context={"request": request},
-            )
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
+        serializer = FavoriteSerializer(
+            data=data,
+            context={"request": request},
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
@@ -181,6 +174,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=user,
             recipe=recipe,
         )
+
         favorite.delete()
         message = {"message": "Рецепт успешно удалён из избранного."}
         return Response(message, status=status.HTTP_204_NO_CONTENT)
@@ -193,16 +187,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         user = request.user
+        data = {"user": user.id, "recipe": recipe.id}
 
-        if request.method == "POST":
-            data = {"user": user.id, "recipe": recipe.id}
-            serializer = Shopping_CartSerializer(
-                data=data, context={"request": request}
-            )
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
+        serializer = Shopping_CartSerializer(
+            data=data, context={"request": request}
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
