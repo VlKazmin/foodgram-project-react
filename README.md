@@ -48,7 +48,7 @@ foodgram-project-react
 
 **Шаг 1: Склонируйте репозиторий и настройте окружение:**
 ```
-git clone https://github.com/yourusername/foodgram-project-react.git
+git clone https://github.com/VlKazmin/foodgram-project-react.git
 cd foodgram-project-react/
 # сделайте копию файла <.env.template> в <.env>
 cp .env.template .env
